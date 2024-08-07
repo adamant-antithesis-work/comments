@@ -19,8 +19,38 @@
                 <tr>
                     <td>{{ post.title }}</td>
                     <td>{{ post.content }}</td>
-                    <td>{{ post.created_at }}</td>
+                    <td>{{ post.created_at|date:"F j, Y, g:i a" }}</td>
                     <td>{{ post.likes }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <h2>Comments</h2>
+                        {% for comment in post.comments.all %}
+                            <div>
+                                <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"F j, Y, g:i a" }}):
+                                {{ comment.text }}
+                                <div>
+                                    Likes: {{ comment.likes }}
+                                    <form action="{% url 'like-comment' comment.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="submit" value="Like">
+                                    </form>
+                                    Dislikes: {{ comment.dislikes }}
+                                    <form action="{% url 'dislike-comment' comment.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <input type="submit" value="Dislike">
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <h3>Add a comment</h3>
+                        <form action="{% url 'add-comment' post.id %}" method="post">
+                            {% csrf_token %}
+                            {{ user_form.as_p }}
+                            {{ comment_form.as_p }}
+                            <input type="submit" value="Add comment">
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

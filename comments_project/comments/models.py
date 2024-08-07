@@ -38,6 +38,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
     likes = models.PositiveIntegerField(default=0)
+    dislikes = models.PositiveIntegerField(default=0)
 
     def clean(self):
         self.text = strip_tags(self.text)
@@ -47,6 +48,10 @@ class Comment(models.Model):
 
     def like(self):
         self.likes += 1
+        self.save()
+
+    def dislike(self):
+        self.dislikes += 1
         self.save()
 
     class Meta:
