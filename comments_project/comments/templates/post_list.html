@@ -29,18 +29,6 @@
                             <div>
                                 <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"F j, Y, g:i a" }}):
                                 {{ comment.text }}
-                                <div>
-                                    Likes: {{ comment.likes }}
-                                    <form action="{% url 'like-comment' comment.id %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <input type="submit" value="Like">
-                                    </form>
-                                    Dislikes: {{ comment.dislikes }}
-                                    <form action="{% url 'dislike-comment' comment.id %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <input type="submit" value="Dislike">
-                                    </form>
-                                </div>
                             </div>
                         {% endfor %}
                         <h3>Add a comment</h3>
