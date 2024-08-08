@@ -1,70 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts</title>
     {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <script src="{% static 'js/scripts.js' %}" defer></script>
 </head>
 <body>
     <h1>Posts</h1>
-    <div>
-        <a href="{% url 'login' %}">Login</a> |
-        <a href="{% url 'register' %}">Register</a> |
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Content</th>
-                <th>Created At</th>
-                <th>Likes</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for post in posts %}
+    <div class="table-container">
+        <div class="user-links">
+            <a href="{% url 'login' %}">Login</a> |
+            <a href="{% url 'register' %}">Register</a>
+        </div>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ post.title }}</td>
-                    <td>{{ post.content }}</td>
-                    <td>{{ post.created_at|date:"F j, Y, g:i a" }}</td>
-                    <td>{{ post.likes }}</td>
+                    <th>Title</th>
+                    <th>Content</th>
+                    <th>Created At</th>
+                    <th>Likes</th>
                 </tr>
-                <tr>
-                    <td colspan="4">
-                        <h2>Comments</h2>
-                        {% for comment in post.comments.all %}
-                            <div>
-                                <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"F j, Y, g:i a" }}):
-                                {{ comment.text }}
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                    <tr>
+                        <td>{{ post.title }}</td>
+                        <td>{{ post.content }}</td>
+                        <td>{{ post.created_at|date:"F j, Y, g:i a" }}</td>
+                        <td>{{ post.likes }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div class="comments">
+                                <h2>Comments</h2>
+
+                                {% include 'comments_tree.html' with comments=post.root_comments user_form=user_form comment_form=comment_form %}
+
+                                <h3>Add a new comment</h3>
+                                <form action="{% url 'add-comment' post.id %}" method="post">
+                                    {% csrf_token %}
+                                    {{ user_form.as_p }}
+                                    {{ comment_form.as_p }}
+                                    <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">
+                                    <input type="submit" value="Add comment">
+                                </form>
                             </div>
-                        {% endfor %}
-                        <h3>Add a comment</h3>
-                        <form action="{% url 'add-comment' post.id %}" method="post">
-                            {% csrf_token %}
-                            {{ user_form.as_p }}
-                            {{ comment_form.as_p }}
-                            <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">
-                            <input type="submit" value="Add comment">
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
 
-            <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
             </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
-        </span>
+        </div>
     </div>
 </body>
 </html>

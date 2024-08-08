@@ -16,6 +16,11 @@ class UserForm(forms.ModelForm):
 
 class CommentForm(forms.ModelForm):
     captcha_text = forms.CharField(max_length=6, required=True)
+    parent = forms.ModelChoiceField(queryset=Comment.objects.all(), required=False, widget=forms.HiddenInput)
+
+    class Meta:
+        model = Comment
+        fields = ['text', 'captcha_text', 'parent']
 
     class Meta:
         model = Comment

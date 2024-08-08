@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views.generic import ListView, FormView
 from django.shortcuts import get_object_or_404, redirect
-from .models import Post, User
+from .models import Post, User, Comment
 from .forms import CommentForm, UserForm
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer
@@ -51,9 +51,13 @@ class PostListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        posts = context['posts']
+
+        for post in posts:
+            root_comments = post.comments.filter(parent__isnull=True)
+            post.root_comments = root_comments
 
         comment_form = CommentForm(request=self.request)
-
         context['user_form'] = UserForm()
         context['comment_form'] = comment_form
         context['captcha_image'] = comment_form.captcha_image
@@ -70,6 +74,7 @@ class AddCommentView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
         context['post'] = post
+        context['parent_id'] = self.request.GET.get('parent_id')
         return context
 
     def get_form_kwargs(self):
@@ -82,5 +87,10 @@ class AddCommentView(LoginRequiredMixin, FormView):
         comment = form.save(commit=False)
         comment.post = post
         comment.user = self.request.user
+
+        parent_id = self.request.POST.get('parent')
+        if parent_id:
+            comment.parent = Comment.objects.get(id=parent_id)
+
         comment.save()
         return redirect('post-list')
