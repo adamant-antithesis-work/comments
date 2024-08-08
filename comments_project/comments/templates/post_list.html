@@ -2,9 +2,14 @@
 <html>
 <head>
     <title>Posts</title>
+    {% load static %}
 </head>
 <body>
     <h1>Posts</h1>
+    <div>
+        <a href="{% url 'login' %}">Login</a> |
+        <a href="{% url 'register' %}">Register</a> |
+    </div>
     <table>
         <thead>
             <tr>
@@ -36,6 +41,7 @@
                             {% csrf_token %}
                             {{ user_form.as_p }}
                             {{ comment_form.as_p }}
+                            <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">
                             <input type="submit" value="Add comment">
                         </form>
                     </td>

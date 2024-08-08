@@ -1,0 +1,8 @@
+<form action="{% url 'add-comment' post.id %}" method="post">
+    {% csrf_token %}
+    {{ user_form.as_p }}
+    {{ comment_form.as_p }}
+    <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">
+    <input type="text" name="captcha_text" placeholder="Enter CAPTCHA">
+    <input type="submit" value="Add comment">
+</form>

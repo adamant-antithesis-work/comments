@@ -1,7 +1,46 @@
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views.generic import ListView, FormView
 from django.shortcuts import get_object_or_404, redirect
 from .models import Post, User
 from .forms import CommentForm, UserForm
+from rest_framework.views import APIView
+from .serializers import RegisterSerializer, LoginSerializer
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({'message': 'User registered successfully', 'user': RegisterSerializer(user).data},
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'redirect_url': '/'
+                })
+            else:
+                return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PostListView(ListView):
@@ -12,47 +51,36 @@ class PostListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        comment_form = CommentForm(request=self.request)
+
         context['user_form'] = UserForm()
-        context['comment_form'] = CommentForm()
+        context['comment_form'] = comment_form
+        context['captcha_image'] = comment_form.captcha_image
+
         return context
 
 
-class AddCommentView(FormView):
+class AddCommentView(LoginRequiredMixin, FormView):
     template_name = 'add_comment.html'
     form_class = CommentForm
-    second_form_class = UserForm
+    login_url = '/login/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
-        context['user_form'] = self.second_form_class()
-        context['comment_form'] = self.form_class()
         context['post'] = post
         return context
 
-    def post(self, request, *args, **kwargs):
-        self.object = None
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
-        user_form = self.second_form_class(self.request.POST)
-        comment_form = self.form_class(self.request.POST)
-
-        if user_form.is_valid() and comment_form.is_valid():
-            user, created = User.objects.get_or_create(
-                username=user_form.cleaned_data['username'],
-                defaults={'email': user_form.cleaned_data['email'], 'home_page': user_form.cleaned_data['home_page']}
-            )
-            if not created:
-                user.email = user_form.cleaned_data['email']
-                user.home_page = user_form.cleaned_data['home_page']
-                user.save()
-
-            comment = comment_form.save(commit=False)
-            comment.post = post
-            comment.user = user
-            comment.save()
-            return redirect('post-list')
-        else:
-            return self.form_invalid(user_form, comment_form)
-
-    def form_invalid(self, user_form, comment_form):
-        return self.render_to_response(self.get_context_data(user_form=user_form, comment_form=comment_form))
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.user = self.request.user
+        comment.save()
+        return redirect('post-list')
