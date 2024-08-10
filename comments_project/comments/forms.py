@@ -1,44 +1,61 @@
 import os
-
 from django import forms
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
 
 from .captcha_utils import generate_captcha
-from .models import Comment, User
-
-
-class UserForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'home_page']
+from .models import Comment
 
 
 class CommentForm(forms.ModelForm):
-    captcha_text = forms.CharField(max_length=6, required=True)
-    parent = forms.ModelChoiceField(queryset=Comment.objects.all(), required=False, widget=forms.HiddenInput)
+    username = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your name'
+        })
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email'
+        })
+    )
+    home_page = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your homepage (optional)'
+        })
+    )
+    captcha_text = forms.CharField(
+        max_length=6,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter CAPTCHA'
+        })
+    )
+    parent = forms.ModelChoiceField(
+        queryset=Comment.objects.all(),
+        required=False,
+        widget=forms.HiddenInput
+    )
 
     class Meta:
         model = Comment
-        fields = ['text', 'captcha_text', 'parent']
-
-    class Meta:
-        model = Comment
-        fields = ['text', 'captcha_text']
+        fields = ['username', 'email', 'home_page', 'text', 'captcha_text', 'parent']
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
         self.captcha_dir = os.path.join(settings.BASE_DIR, 'static', 'captcha')
-
         self.captcha_text, self.captcha_image = self.get_captcha()
 
         self.fields['text'].widget.attrs.update({'class': 'form-control'})
-        self.fields['captcha_text'].widget.attrs.update({
-            'class': 'form-control',
-            'placeholder': 'Enter CAPTCHA'
-        })
 
     def get_captcha(self):
         captcha_files = [f for f in os.listdir(self.captcha_dir) if os.path.isfile(os.path.join(self.captcha_dir, f))]

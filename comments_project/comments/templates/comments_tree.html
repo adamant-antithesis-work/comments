@@ -2,8 +2,8 @@
 {% for comment in comments %}
     <div class="comment" id="comment-{{ comment.id }}">
         <div class="comment-header">
-            <img src="{% static 'path_to_user_avatar' %}" alt="{{ comment.user.username }}">
-            <strong>{{ comment.user.username }}</strong>
+            <img src="{% static 'path_to_user_avatar' %}" alt="{{ comment.username|default:comment.user.username }}">
+            <strong>{{ comment.username|default:comment.user.username }}</strong>
             <span class="timestamp">{{ comment.created_at|date:"F j, Y, g:i a" }}</span>
         </div>
         <div class="comment-body">
@@ -22,14 +22,13 @@
         </div>
 
         <div class="replies">
-            {% include 'comments_tree.html' with comments=comment.replies.all user_form=user_form comment_form=comment_form %}
+            {% include 'comments_tree.html' with comments=comment.replies.all comment_form=comment_form %}
         </div>
 
         <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
             <h3>Reply to this comment</h3>
             <form action="{% url 'add-comment' post.id %}" method="post">
                 {% csrf_token %}
-                {{ user_form.as_p }}
                 {{ comment_form.as_p }}
                 <input type="hidden" name="parent" value="{{ comment.id }}">
                 <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">

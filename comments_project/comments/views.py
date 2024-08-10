@@ -1,10 +1,9 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views.generic import ListView, FormView
 from django.shortcuts import get_object_or_404, redirect
-from .models import Post, User, Comment
-from .forms import CommentForm, UserForm
+from .models import Post, Comment
+from .forms import CommentForm
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer
 from rest_framework import status
@@ -58,7 +57,6 @@ class PostListView(ListView):
             post.root_comments = root_comments
 
         comment_form = CommentForm(request=self.request)
-        context['user_form'] = UserForm()
         context['comment_form'] = comment_form
         context['captcha_image'] = comment_form.captcha_image
 
@@ -87,6 +85,7 @@ class AddCommentView(LoginRequiredMixin, FormView):
         comment = form.save(commit=False)
         comment.post = post
         comment.user = self.request.user
+        comment.username = form.cleaned_data.get('username')
 
         parent_id = self.request.POST.get('parent')
         if parent_id:
