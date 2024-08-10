@@ -1,5 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 from django.views.generic import ListView, FormView
 from django.shortcuts import get_object_or_404, redirect
 from .models import Post, Comment
@@ -96,7 +98,11 @@ class AddCommentView(LoginRequiredMixin, FormView):
         if new_home_page and user.home_page != new_home_page:
             user.home_page = new_home_page
 
-        user.save()
+        try:
+            user.save()
+        except IntegrityError:
+            form.add_error('email', 'Этот email уже используется другим пользователем.')
+            return self.form_invalid(form)
 
         comment.username = form.cleaned_data.get('username')
 
@@ -104,5 +110,13 @@ class AddCommentView(LoginRequiredMixin, FormView):
         if parent_id:
             comment.parent = Comment.objects.get(id=parent_id)
 
-        comment.save()
+        try:
+            comment.save()
+        except IntegrityError:
+            form.add_error(None, 'Ошибка при сохранении комментария.')
+            return self.form_invalid(form)
+
         return redirect('post-list')
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))

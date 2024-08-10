@@ -1,7 +1,18 @@
+{% load static %}
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 <form action="{% url 'add-comment' post.id %}" method="post">
     {% csrf_token %}
-    {{ comment_form.as_p }}
-    <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">
+    {{ form.as_p }}
+    <img src="{% static 'captcha/'|add:form.captcha_image %}" alt="CAPTCHA">
     <input type="text" name="captcha_text" placeholder="Enter CAPTCHA">
     <input type="submit" value="Add comment">
 </form>

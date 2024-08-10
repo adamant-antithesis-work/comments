@@ -1,6 +1,5 @@
 import os
 from django import forms
-from rest_framework.exceptions import ValidationError
 from django.conf import settings
 
 from .captcha_utils import generate_captcha
@@ -74,7 +73,7 @@ class CommentForm(forms.ModelForm):
         expected_captcha_text = self.captcha_text
 
         if captcha_text.upper() != expected_captcha_text:
-            raise ValidationError("Invalid CAPTCHA")
+            self.add_error('captcha_text', 'Неверная CAPTCHA')
 
         captcha_image_path = os.path.join(self.captcha_dir, self.captcha_image)
         if os.path.exists(captcha_image_path):
