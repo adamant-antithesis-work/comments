@@ -37,7 +37,7 @@
                             <div class="comments">
                                 <h2>Comments</h2>
 
-                                {% include 'comments_tree.html' with comments=post.comments.all comment_form=comment_form %}
+                                {% include 'comments_tree.html' with comments=post.root_comments comment_form=comment_form %}
 
                                 <h3>Add a new comment</h3>
                                 <form action="{% url 'add-comment' post.id %}" method="post">

@@ -85,6 +85,19 @@ class AddCommentView(LoginRequiredMixin, FormView):
         comment = form.save(commit=False)
         comment.post = post
         comment.user = self.request.user
+
+        user = self.request.user
+        new_email = form.cleaned_data.get('email')
+        new_home_page = form.cleaned_data.get('home_page')
+
+        if new_email and user.email != new_email:
+            user.email = new_email
+
+        if new_home_page and user.home_page != new_home_page:
+            user.home_page = new_home_page
+
+        user.save()
+
         comment.username = form.cleaned_data.get('username')
 
         parent_id = self.request.POST.get('parent')
