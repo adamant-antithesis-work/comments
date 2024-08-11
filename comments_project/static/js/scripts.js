@@ -10,4 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    document.querySelectorAll('[data-toggle="collapse"]').forEach(button => {
+        button.addEventListener('click', event => {
+            event.preventDefault();
+            const targetSelector = button.getAttribute('data-target');
+            const form = document.querySelector(targetSelector);
+
+            if (form) {
+                form.classList.toggle('show');
+            }
+        });
+    });
 });

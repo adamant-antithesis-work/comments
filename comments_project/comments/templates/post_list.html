@@ -14,45 +14,58 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center my-4">Posts</h1>
+        <h1 class="text-center my-4">Blog</h1>
 
         <div class="mb-4 d-flex justify-content-end">
             <a href="{% url 'login' %}" class="btn btn-link">Login</a>
             <a href="{% url 'register' %}" class="btn btn-link ml-2">Register</a>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Title</th>
-                        <th>Content</th>
-                        <th>Created At</th>
-                        <th>Likes</th>
-                    </tr>
-                </thead>
+        <div>
+            <table>
                 <tbody>
                     {% for post in posts %}
                         <tr>
-                            <td>{{ post.title }}</td>
-                            <td>{{ post.content }}</td>
-                            <td>{{ post.created_at|date:"F j, Y, g:i a" }}</td>
-                            <td>{{ post.likes }}</td>
-                        </tr>
-                        <tr>
                             <td colspan="4">
-                                <div class="comments mt-3">
-                                    <h2>Comments</h2>
+                                <div class="post-header d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="mb-0">{{ post.title }}</h2>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-muted mr-2">{{ post.created_at|date:"d.m.Y в H:i" }}</span>
+                                        <div class="d-flex align-items-center">
+                                            <form action="{% url 'like-dislike' post.id 'post' 'like' %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-link p-0">
+                                                    <span style="font-size: 16px;">&#9650;</span>
+                                                </button>
+                                            </form>
+                                            <span class="ml-1 mr-1">{{ post.likes }}</span>
+                                            <form action="{% url 'like-dislike' post.id 'post' 'dislike' %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-link p-0">
+                                                    <span style="font-size: 16px;">&#9660;</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                    {% include 'comments_tree.html' with comments=post.root_comments comment_form=comment_form %}
+                                <div class="post-content mb-3">
+                                    <p>{{ post.content }}</p>
+                                </div>
 
-                                    <h3 class="mt-4">Add a new comment</h3>
+                                <a href="#" class="btn btn-primary" data-toggle="collapse" data-target="#add-comment-form-{{ post.id }}">Add Comment</a>
+                                <div id="add-comment-form-{{ post.id }}" class="collapse mt-3">
                                     <form action="{% url 'add-comment' post.id %}" method="post">
                                         {% csrf_token %}
                                         {{ comment_form.as_p }}
                                         <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
                                         <button type="submit" class="btn btn-primary">Add comment</button>
                                     </form>
+                                </div>
+
+                                <div class="comments mt-3">
+                                    <h2>Comments</h2>
+                                    {% include 'comments_tree.html' with comments=post.root_comments comment_form=comment_form %}
                                 </div>
                             </td>
                         </tr>

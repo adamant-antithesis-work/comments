@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import PostListView, AddCommentView, RegisterView, LoginView
+from .views import PostListView, AddCommentView, RegisterView, LoginView, LikeDislikeView
 
 urlpatterns = [
     path('', PostListView.as_view(), name='post-list'),
     path('add-comment/<int:post_id>/', AddCommentView.as_view(), name='add-comment'),
+    path('like-dislike/<int:content_id>/<str:content_type>/<str:action>/', LikeDislikeView.as_view(), name='like-dislike'),
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
 ]

@@ -1,22 +1,37 @@
 {% load static %}
+<link rel="stylesheet" href="{% static 'css/custom.css' %}">
 {% for comment in comments %}
-    <div class="comment border rounded p-3 mb-3" id="comment-{{ comment.id }}">
+    <div class="comment rounded p-3 mb-3" id="comment-{{ comment.id }}" style="position: relative; border: 1px solid transparent; margin-bottom: -200px;">
         <div class="comment-header d-flex align-items-center mb-2">
             <strong>{{ comment.username|default:comment.user.username }}</strong>
             <span class="text-muted ml-2" style="margin-right: 8px;">{{ comment.created_at|date:"d.m.Y в H:i" }}</span>
-            <a href="#" class="btn btn-link p-0 reply-button" data-target="#reply-form-{{ comment.id }}">
-                    <img src="{% static 'img/reply_icon.png' %}" alt="Reply" style="width: 16px; height: 16px;">
+            <a href="#" class="btn btn-link p-0 ml-2 reply-button" data-target="#reply-form-{{ comment.id }}">
+                <img src="{% static 'img/reply_icon.png' %}" alt="Reply" style="width: 16px; height: 16px;">
             </a>
+            <div class="ml-auto d-flex align-items-center">
+                <form action="{% url 'like-dislike' comment.id 'comment' 'like' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link p-0">
+                        <span style="font-size: 16px;">&#9650;</span>
+                    </button>
+                </form>
+                <span class="ml-1 mr-1">{{ comment.likes }}</span>
+                <form action="{% url 'like-dislike' comment.id 'comment' 'dislike' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link p-0">
+                        <span style="font-size: 16px;">&#9660;</span>
+                    </button>
+                </form>
+            </div>
         </div>
         <div class="comment-body">
             {{ comment.text }}
         </div>
-        <div class="replies ml-4 mt-3">
+        <div class="replies mt-3" style="margin-left: 20px; margin-right: -17px; margin-bottom: -30px;">
             {% include 'comments_tree.html' with comments=comment.replies.all comment_form=comment_form %}
         </div>
-
         <div class="reply-form mt-3" id="reply-form-{{ comment.id }}" style="display: none;">
-            <h4>Reply to this comment</h4>
+            <h4 class="mt-20">Reply to this comment</h4>
             <form action="{% url 'add-comment' post.id %}" method="post">
                 {% if form.non_field_errors %}
                     <div class="alert alert-danger">

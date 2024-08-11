@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
+from django.views import View
 from django.views.generic import ListView, FormView
 from django.shortcuts import get_object_or_404, redirect
 from .models import Post, Comment
@@ -120,3 +121,21 @@ class AddCommentView(LoginRequiredMixin, FormView):
 
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class LikeDislikeView(View):
+    def post(self, request, content_id, content_type, action):
+        if content_type == 'post':
+            content = get_object_or_404(Post, id=content_id)
+        elif content_type == 'comment':
+            content = get_object_or_404(Comment, id=content_id)
+        else:
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        if action == 'like':
+            content.likes += 1
+        elif action == 'dislike':
+            if content.likes > 0:
+                content.likes -= 1
+        content.save()
+        return redirect(request.META.get('HTTP_REFERER', '/'))
