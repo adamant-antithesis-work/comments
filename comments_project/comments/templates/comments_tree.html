@@ -1,32 +1,22 @@
 {% load static %}
 {% for comment in comments %}
-    <div class="comment" id="comment-{{ comment.id }}">
-        <div class="comment-header">
-            <img src="{% static 'path_to_user_avatar' %}" alt="{{ comment.username|default:comment.user.username }}">
+    <div class="comment border rounded p-3 mb-3" id="comment-{{ comment.id }}">
+        <div class="comment-header d-flex align-items-center mb-2">
             <strong>{{ comment.username|default:comment.user.username }}</strong>
-            <span class="timestamp">{{ comment.created_at|date:"F j, Y, g:i a" }}</span>
+            <span class="text-muted ml-2" style="margin-right: 8px;">{{ comment.created_at|date:"d.m.Y в H:i" }}</span>
+            <a href="#" class="btn btn-link p-0 reply-button" data-target="#reply-form-{{ comment.id }}">
+                    <img src="{% static 'img/reply_icon.png' %}" alt="Reply" style="width: 16px; height: 16px;">
+            </a>
         </div>
         <div class="comment-body">
             {{ comment.text }}
         </div>
-        <div class="comment-footer">
-            <div class="actions">
-                <a href="#" class="reply-button" data-target="#reply-form-{{ comment.id }}">Reply</a>
-                <a href="#">Edit</a>
-                <a href="#">Delete</a>
-            </div>
-            <div class="vote">
-                <span>+{{ comment.likes }}</span>
-                <span>-{{ comment.dislikes }}</span>
-            </div>
-        </div>
-
-        <div class="replies">
+        <div class="replies ml-4 mt-3">
             {% include 'comments_tree.html' with comments=comment.replies.all comment_form=comment_form %}
         </div>
 
-        <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
-            <h3>Reply to this comment</h3>
+        <div class="reply-form mt-3" id="reply-form-{{ comment.id }}" style="display: none;">
+            <h4>Reply to this comment</h4>
             <form action="{% url 'add-comment' post.id %}" method="post">
                 {% if form.non_field_errors %}
                     <div class="alert alert-danger">
@@ -40,8 +30,8 @@
                 {% csrf_token %}
                 {{ comment_form.as_p }}
                 <input type="hidden" name="parent" value="{{ comment.id }}">
-                <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA">
-                <input type="submit" value="Reply">
+                <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
+                <button type="submit" class="btn btn-primary">Reply</button>
             </form>
         </div>
     </div>
