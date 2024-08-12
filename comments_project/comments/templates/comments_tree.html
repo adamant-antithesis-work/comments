@@ -1,25 +1,52 @@
 {% load static %}
+{% load filters %}
 <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 {% for comment in comments %}
     <div class="comment rounded p-3 mb-3" id="comment-{{ comment.id }}" style="position: relative; border: 1px solid transparent; margin-bottom: -200px;">
-        <div class="comment-header d-flex align-items-center mb-2">
-            <strong>{{ comment.username|default:comment.user.username }}</strong>
-            <span class="text-muted ml-2" style="margin-right: 8px;">{{ comment.created_at|date:"d.m.Y в H:i" }}</span>
-            <a href="#" class="btn btn-link p-0 ml-2 reply-button" data-target="#reply-form-{{ comment.id }}">
-                <img src="{% static 'img/reply_icon.png' %}" alt="Reply" style="width: 16px; height: 16px;">
+        <div class="comment-header">
+            {% if comment.user.avatar %}
+              <img src="{{ comment.user.avatar|with_avatars_prefix }}" alt="{{ comment.user.username }}'s avatar" class="avatar-img" />
+            {% else %}
+              <img src="{% static 'img/avatar-default.svg' %}" alt="Default avatar" class="avatar-img" />
+            {% endif %}
+            <strong class="comment-username">{{ comment.username|default:comment.user.username }}</strong>
+            <span class="text-muted ml-2">{{ comment.created_at|date:"d.m.Y в H:i" }}</span>
+            <a href="#" class="btn btn-link p-0 ml-2 reply-button" data-toggle="modal" data-target="#reply-modal-{{ comment.id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-reply reply-icon" viewBox="0 0 16 16">
+                    <path d="M6.598 5.013a.144.144 0 0 1 .202.134V6.3a.5.5 0 0 0 .5.5c.667 0 2.013.005 3.3.822.984.624 1.99 1.76 2.595 3.876-1.02-.983-2.185-1.516-3.205-1.799a8.7 8.7 0 0 0-1.921-.306 7 7 0 0 0-.798.008h-.013l-.005.001h-.001L7.3 9.9l-.05-.498a.5.5 0 0 0-.45.498v1.153c0 .108-.11.176-.202.134L2.614 8.254l-.042-.028a.147.147 0 0 1 0-.252l.042-.028zM7.8 10.386q.103 0 .223.006c.434.02 1.034.086 1.7.271 1.326.368 2.896 1.202 3.94 3.08a.5.5 0 0 0 .933-.305c-.464-3.71-1.886-5.662-3.46-6.66-1.245-.79-2.527-.942-3.336-.971v-.66a1.144 1.144 0 0 0-1.767-.96l-3.994 2.94a1.147 1.147 0 0 0 0 1.946l3.994 2.94a1.144 1.144 0 0 0 1.767-.96z"/>
+                </svg>
+            </a>
+            <a href="#" class="btn btn-link p-0 ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-bookmark" viewBox="0 0 16 16">
+                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1z"/>
+                </svg>
+            </a>
+            <a href="#" class="btn btn-link p-0 ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-option" viewBox="0 0 16 16">
+                  <path d="M1 2.5a.5.5 0 0 1 .5-.5h3.797a.5.5 0 0 1 .439.26L11 13h3.5a.5.5 0 0 1 0 1h-3.797a.5.5 0 0 1-.439-.26L5 3H1.5a.5.5 0 0 1-.5-.5m10 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </a>
+            <a href="#" class="btn btn-link p-0 ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
+                </svg>
             </a>
             <div class="ml-auto d-flex align-items-center">
                 <form action="{% url 'like-dislike' comment.id 'comment' 'like' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link p-0">
-                        <span style="font-size: 16px;">&#9650;</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"/>
+                        </svg>
                     </button>
                 </form>
-                <span class="ml-1 mr-1">{{ comment.likes }}</span>
+                <span class="ml-1 mr-1 like-counter">{{ comment.likes }}</span>
                 <form action="{% url 'like-dislike' comment.id 'comment' 'dislike' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link p-0">
-                        <span style="font-size: 16px;">&#9660;</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+                        </svg>
                     </button>
                 </form>
             </div>
@@ -27,27 +54,30 @@
         <div class="comment-body">
             {{ comment.text }}
         </div>
-        <div class="replies mt-3" style="margin-left: 20px; margin-right: -17px; margin-bottom: -30px;">
+        <div class="replies mt-3" style="margin-left: 15px; margin-right: -17px; margin-bottom: -30px;">
             {% include 'comments_tree.html' with comments=comment.replies.all comment_form=comment_form %}
         </div>
-        <div class="reply-form mt-3" id="reply-form-{{ comment.id }}" style="display: none;">
-            <h4 class="mt-20">Reply to this comment</h4>
-            <form action="{% url 'add-comment' post.id %}" method="post">
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        <ul>
-                            {% for error in form.non_field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
+
+        <div class="modal fade" id="reply-modal-{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="reply-modal-label-{{ comment.id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reply-modal-label-{{ comment.id }}">Reply to this comment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                {% endif %}
-                {% csrf_token %}
-                {{ comment_form.as_p }}
-                <input type="hidden" name="parent" value="{{ comment.id }}">
-                <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
-                <button type="submit" class="btn btn-primary">Reply</button>
-            </form>
+                    <div class="modal-body">
+                        <form action="{% url 'add-comment' post.id %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ comment_form.as_p }}
+                            <input type="hidden" name="parent" value="{{ comment.id }}">
+                            <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
+                            <button type="submit" class="btn btn-primary reply-button">Reply</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endfor %}

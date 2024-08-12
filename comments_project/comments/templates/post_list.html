@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts</title>
     {% load static %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
@@ -14,7 +17,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center my-4">Blog</h1>
+        <h1 class="text-center">Blog</h1>
 
         <div class="mb-4 d-flex justify-content-end">
             <a href="{% url 'login' %}" class="btn btn-link">Login</a>
@@ -34,16 +37,20 @@
                                         <div class="d-flex align-items-center">
                                             <form action="{% url 'like-dislike' post.id 'post' 'like' %}" method="post">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-link p-0">
-                                                    <span style="font-size: 16px;">&#9650;</span>
-                                                </button>
+                                              <button type="submit" class="btn btn-link p-0">
+                                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up" viewBox="0 0 16 16">
+                                                      <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"/>
+                                                  </svg>
+                                              </button>
                                             </form>
-                                            <span class="ml-1 mr-1">{{ post.likes }}</span>
+                                            <span class="ml-1 mr-1 like-counter" style="padding-top: 6px">{{ post.likes }}</span>
                                             <form action="{% url 'like-dislike' post.id 'post' 'dislike' %}" method="post">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-link p-0">
-                                                    <span style="font-size: 16px;">&#9660;</span>
-                                                </button>
+                                            <button type="submit" class="btn btn-link p-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+                                                </svg>
+                                            </button>
                                             </form>
                                         </div>
                                     </div>
@@ -53,18 +60,33 @@
                                     <p>{{ post.content }}</p>
                                 </div>
 
-                                <a href="#" class="btn btn-primary" data-toggle="collapse" data-target="#add-comment-form-{{ post.id }}">Add Comment</a>
-                                <div id="add-comment-form-{{ post.id }}" class="collapse mt-3">
-                                    <form action="{% url 'add-comment' post.id %}" method="post">
-                                        {% csrf_token %}
-                                        {{ comment_form.as_p }}
-                                        <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
-                                        <button type="submit" class="btn btn-primary">Add comment</button>
-                                    </form>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCommentModal-{{ post.id }}">
+                                  Add Comment
+                                </button>
+
+                                <div class="modal fade" id="addCommentModal-{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Add Comment</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <form action="{% url 'add-comment' post.id %}" method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            {{ comment_form.as_p }}
+                                            <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
+                                            <button type="submit" class="btn btn-primary comment-button">Add comment</button>
+                                        </form>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                <div class="comments mt-3">
-                                    <h2>Comments</h2>
+                                <div class="comments-section mt-3">
+                                    <h2 class="comments-h2">Comments</h2>
                                     {% include 'comments_tree.html' with comments=post.root_comments comment_form=comment_form %}
                                 </div>
                             </td>

@@ -29,6 +29,7 @@ class User(AbstractBaseUser):
         unique=True
     )
     home_page = models.URLField(validators=[URLValidator()], blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 

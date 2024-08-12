@@ -29,6 +29,14 @@ class CommentForm(forms.ModelForm):
             'placeholder': 'Enter your homepage (optional)'
         })
     )
+    text = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your comment',
+            'style': 'height: 100px;'
+        })
+    )
+    avatar = forms.ImageField(required=False)
     captcha_text = forms.CharField(
         max_length=6,
         required=True,
@@ -45,7 +53,7 @@ class CommentForm(forms.ModelForm):
 
     class Meta:
         model = Comment
-        fields = ['username', 'email', 'home_page', 'text', 'captcha_text', 'parent']
+        fields = ['username', 'email', 'home_page', 'text', 'avatar',  'captcha_text', 'parent']
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

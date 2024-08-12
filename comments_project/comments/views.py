@@ -1,4 +1,5 @@
-from django.contrib import messages
+import os
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
@@ -12,6 +13,8 @@ from .serializers import RegisterSerializer, LoginSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from django.conf import settings
 
 
 class RegisterView(APIView):
@@ -100,21 +103,22 @@ class AddCommentView(LoginRequiredMixin, FormView):
             user.home_page = new_home_page
 
         try:
-            user.save()
-        except IntegrityError:
-            form.add_error('email', 'Этот email уже используется другим пользователем.')
-            return self.form_invalid(form)
-
-        comment.username = form.cleaned_data.get('username')
-
-        parent_id = self.request.POST.get('parent')
-        if parent_id:
-            comment.parent = Comment.objects.get(id=parent_id)
-
-        try:
             comment.save()
-        except IntegrityError:
-            form.add_error(None, 'Ошибка при сохранении комментария.')
+
+            if 'avatar' in self.request.FILES:
+                avatar = self.request.FILES['avatar']
+                filename = f'user_{comment.user.id}_{comment.id}.jpg'
+                filepath = os.path.join(settings.MEDIA_ROOT, 'avatars', filename)
+                with open(filepath, 'wb+') as f:
+                    f.write(avatar.read())
+                comment.user.avatar = filename
+
+            user.save()
+        except IntegrityError as e:
+            if 'email' in str(e):
+                form.add_error('email', 'Этот email уже используется другим пользователем.')
+            else:
+                form.add_error(None, 'Ошибка при сохранении комментария.')
             return self.form_invalid(form)
 
         return redirect('post-list')
