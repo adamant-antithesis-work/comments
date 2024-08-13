@@ -2,6 +2,7 @@ import os
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.views import View
 from django.views.generic import ListView, FormView
@@ -61,6 +62,11 @@ class PostListView(ListView):
         for post in posts:
             root_comments = post.comments.filter(parent__isnull=True)
             post.root_comments = root_comments
+
+            paginator = Paginator(root_comments, 25)
+            page_number = self.request.GET.get(f'comments_page_{post.id}', 1)
+            page_obj = paginator.get_page(page_number)
+            post.page_obj = page_obj
 
         comment_form = CommentForm(request=self.request)
         context['comment_form'] = comment_form
