@@ -14,6 +14,16 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script src="{% static 'js/scripts.js' %}" defer></script>
+    <script src="{% static 'js/table.js' %}" defer></script>
+    <style>
+        .comment-table {
+            margin-top: 20px;
+        }
+        .comment-table th, .comment-table td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -37,20 +47,20 @@
                                         <div class="d-flex align-items-center">
                                             <form action="{% url 'like-dislike' post.id 'post' 'like' %}" method="post">
                                                 {% csrf_token %}
-                                              <button type="submit" class="btn btn-link p-0">
-                                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up" viewBox="0 0 16 16">
-                                                      <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"/>
-                                                  </svg>
-                                              </button>
+                                                <button type="submit" class="btn btn-link p-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up" viewBox="0 0 16 16">
+                                                        <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"/>
+                                                    </svg>
+                                                </button>
                                             </form>
                                             <span class="ml-1 mr-1 like-counter" style="padding-top: 6px">{{ post.likes }}</span>
                                             <form action="{% url 'like-dislike' post.id 'post' 'dislike' %}" method="post">
                                                 {% csrf_token %}
-                                            <button type="submit" class="btn btn-link p-0">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-down" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
-                                                </svg>
-                                            </button>
+                                                <button type="submit" class="btn btn-link p-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                                                        <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+                                                    </svg>
+                                                </button>
                                             </form>
                                         </div>
                                     </div>
@@ -64,25 +74,64 @@
                                   Add Comment
                                 </button>
 
-                                <div class="modal fade" id="addCommentModal-{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                  <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                      <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Add Comment</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                          <span aria-hidden="true">&times;</span>
-                                        </button>
-                                      </div>
-                                      <div class="modal-body">
-                                        <form action="{% url 'add-comment' post.id %}" method="post" enctype="multipart/form-data">
-                                            {% csrf_token %}
-                                            {{ comment_form.as_p }}
-                                            <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
-                                            <button type="submit" class="btn btn-primary comment-button">Add comment</button>
-                                        </form>
-                                      </div>
+                                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#commentsTableModal-{{ post.id }}">
+                                  View Comments Table
+                                </button>
+
+                                <div class="modal fade" id="commentsTableModal-{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="commentsTableModalLabel-{{ post.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg container-fluid" role="document">
+                                        <div class="modal-content">
+                                              <div class="modal-header">
+                                                  <h5 class="modal-title" id="commentsTableModalLabel-{{ post.id }}">Comments for {{ post.title }}</h5>
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                  </button>
+                                              </div>
+                                              <div class="modal-body">
+                                                  <table class="table table-striped comment-table" id="comment-table-{{ post.id }}">
+                                                      <thead>
+                                                          <tr>
+                                                              <th><a href="#" onclick="sortTable({{ post.id }}, 0)">Username</a></th>
+                                                              <th><a href="#" onclick="sortTable({{ post.id }}, 1)">Email</a></th>
+                                                              <th><a href="#" onclick="sortTable({{ post.id }}, 2)">Date</a></th>
+                                                              <th>Content</th>
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                          {% for comment in post.root_comments %}
+                                                              <tr>
+                                                                  <td>{{ comment.username|default:comment.user.username }}</td>
+                                                                  <td>{{ comment.user.email }}</td>
+                                                                  <td>{{ comment.created_at|date:"d.m.Y в H:i" }}</td>
+                                                                  <td>{{ comment.text }}</td>
+                                                              </tr>
+                                                          {% endfor %}
+                                                    </tbody>
+                                                 </table>
+                                            </div>
+                                        </div>
                                     </div>
-                                  </div>
+                                </div>
+
+                                <div class="modal fade" id="addCommentModal-{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                              <div class="modal-header">
+                                                  <h5 class="modal-title" id="exampleModalLabel">Add Comment</h5>
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                      <span aria-hidden="true">&times;</span>
+                                                  </button>
+                                              </div>
+                                              <div class="modal-body">
+                                                  <form action="{% url 'add-comment' post.id %}" method="post" enctype="multipart/form-data">
+                                                      {% csrf_token %}
+                                                      {{ comment_form.as_p }}
+                                                      <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
+                                                      <button type="submit" class="btn btn-primary comment-button">Add comment</button>
+                                                  </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="comments-section mt-3">
@@ -99,11 +148,11 @@
                                                 <a class="page-link" href="?comments_page_{{ post.id }}={{ post.page_obj.previous_page_number }}">previous</a>
                                             </li>
                                         {% endif %}
-
-                                        <li class="page-item disabled">
-                                            <span class="page-link">Page {{ post.page_obj.number }} of {{ post.page_obj.paginator.num_pages }}</span>
-                                        </li>
-
+                                        {% for num in post.page_obj.paginator.page_range %}
+                                            <li class="page-item {% if post.page_obj.number == num %}active{% endif %}">
+                                                <a class="page-link" href="?comments_page_{{ post.id }}={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endfor %}
                                         {% if post.page_obj.has_next %}
                                             <li class="page-item">
                                                 <a class="page-link" href="?comments_page_{{ post.id }}={{ post.page_obj.next_page_number }}">next</a>
