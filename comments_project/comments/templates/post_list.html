@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script src="{% static 'js/scripts.js' %}" defer></script>
     <script src="{% static 'js/table.js' %}" defer></script>
+    <script src="{% static 'js/like_dislike.js' %}"></script>
+    <script src="{% static 'js/preview.js' %}"></script>
 </head>
 <body>
     <div class="container">
@@ -109,7 +111,7 @@
                                     <div class="d-flex align-items-center">
                                         <span class="text-muted mr-2">{{ post.created_at|date:"d.m.Y в H:i" }}</span>
                                         <div class="d-flex align-items-center">
-                                            <form action="{% url 'like-dislike' post.id 'post' 'like' %}" method="post">
+                                            <form class="like-form" data-id="{{ post.id }}" action="{% url 'like-dislike' post.id 'post' 'like' %}" method="post">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-link p-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up" viewBox="0 0 16 16">
@@ -117,8 +119,8 @@
                                                     </svg>
                                                 </button>
                                             </form>
-                                            <span class="ml-1 mr-1 like-counter" style="padding-top: 6px; color: {% if post.likes < 0 %} red {% else %} inherit {% endif %};">{{ post.likes }}</span>
-                                            <form action="{% url 'like-dislike' post.id 'post' 'dislike' %}" method="post">
+                                            <span class="ml-1 mr-1 like-counter" data-id="{{ post.id }}" data-likes="{{ post.likes }}" style="padding-top: 6px; color: {% if post.likes < 0 %} red {% else %} inherit {% endif %};">{{ post.likes }}</span>
+                                            <form class="dislike-form" data-id="{{ post.id }}" action="{% url 'like-dislike' post.id 'post' 'dislike' %}" method="post">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-link p-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-down" viewBox="0 0 16 16">
@@ -182,19 +184,39 @@
                                 <div class="modal fade" id="addCommentModal-{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
-                                              <div class="modal-header">
-                                                  <h5 class="modal-title" id="exampleModalLabel">Add Comment</h5>
-                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                      <span aria-hidden="true">&times;</span>
-                                                  </button>
-                                              </div>
-                                              <div class="modal-body">
-                                                  <form action="{% url 'add-comment' post.id %}" method="post" enctype="multipart/form-data">
-                                                      {% csrf_token %}
-                                                      {{ comment_form.as_p }}
-                                                      <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
-                                                      <button type="submit" class="btn btn-primary comment-button">Add comment</button>
-                                                  </form>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Add Comment</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{% url 'add-comment' post.id %}" method="post" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+                                                    {{ comment_form.as_p }}
+                                                    <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
+                                                    <button type="button" class="btn btn-secondary" id="previewButton-{{ post.id }}" data-toggle="modal" data-target="#previewModal-{{ post.id }}">Preview</button>
+                                                    <button type="submit" class="btn btn-primary comment-button">Add comment</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="previewModal-{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel-{{ post.id }}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="previewModalLabel-{{ post.id }}">Comment Preview</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div id="previewContent-{{ post.id }}"></div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                             </div>
                                         </div>
                                     </div>

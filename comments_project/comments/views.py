@@ -176,11 +176,12 @@ class LikeDislikeView(View):
         elif content_type == 'comment':
             content = get_object_or_404(Comment, id=content_id)
         else:
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+            return JsonResponse({'success': False})
 
         if action == 'like':
             content.likes += 1
         elif action == 'dislike':
             content.likes -= 1
         content.save()
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        return JsonResponse({'success': True, 'likes': content.likes})

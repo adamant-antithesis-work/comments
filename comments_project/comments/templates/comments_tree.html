@@ -1,5 +1,6 @@
 {% load static %}
 {% load filters %}
+<script src="{% static 'js/preview.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 {% for comment in comments %}
     <div class="comment rounded p-3 mb-3" id="comment-{{ comment.id }}" style="position: relative; border: 1px solid transparent; margin-bottom: -200px;">
@@ -34,7 +35,7 @@
                 </svg>
             </a>
             <div class="ml-auto d-flex align-items-center">
-                <form action="{% url 'like-dislike' comment.id 'comment' 'like' %}" method="post">
+                <form class="like-form" data-id="{{ comment.id }}" action="{% url 'like-dislike' comment.id 'comment' 'like' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link p-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-up" viewBox="0 0 16 16">
@@ -42,8 +43,8 @@
                         </svg>
                     </button>
                 </form>
-                <span class="ml-1 mr-1 like-counter" style="color: {% if comment.likes < 0 %} red {% else %} inherit {% endif %};">{{ comment.likes }}</span>
-                <form action="{% url 'like-dislike' comment.id 'comment' 'dislike' %}" method="post">
+                <span class="ml-1 mr-1 like-counter" data-id="{{ comment.id }}" style="color: {% if comment.likes < 0 %} red {% else %} inherit {% endif %};">{{ comment.likes }}</span>
+                <form class="dislike-form" data-id="{{ comment.id }}" action="{% url 'like-dislike' comment.id 'comment' 'dislike' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link p-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#84b6e6" class="bi bi-arrow-down" viewBox="0 0 16 16">
@@ -75,8 +76,28 @@
                             {{ comment_form.as_p }}
                             <input type="hidden" name="parent" value="{{ comment.id }}">
                             <img src="{% static 'captcha/'|add:captcha_image %}" alt="CAPTCHA" class="my-2">
+                            <button type="button" class="btn btn-secondary" id="previewButton-{{ comment.id }}" data-toggle="modal" data-target="#previewModal-{{ comment.id }}">Preview</button>
                             <button type="submit" class="btn btn-primary re-button">Reply</button>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="previewModal-{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel-{{ comment.id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="previewModalLabel-{{ comment.id }}">Comment Preview</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="previewContent-{{ comment.id }}"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
