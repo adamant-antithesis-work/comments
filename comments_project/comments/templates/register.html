@@ -7,6 +7,9 @@
     <h1>Register</h1>
     <form method="post" action="{% url 'register' %}">
         {% csrf_token %}
+        <label for="login">Login:</label>
+        <input type="text" id="login" name="login" required>
+        <br>
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
         <br>

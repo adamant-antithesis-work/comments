@@ -64,6 +64,7 @@ SIMPLE_JWT = {
 }
 
 AUTHENTICATION_BACKENDS = [
+    'comments.auth_backends.LoginBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

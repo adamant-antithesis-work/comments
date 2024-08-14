@@ -1,13 +1,13 @@
 import os
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.views import View
 from django.views.generic import ListView, FormView
 from django.shortcuts import get_object_or_404, redirect
-from .models import Post, Comment
+from .models import Post, Comment, User
 from .forms import CommentForm
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer
@@ -32,12 +32,12 @@ class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
+            login = serializer.validated_data['login']
             password = serializer.validated_data['password']
 
-            user = authenticate(request, email=email, password=password)
+            user = authenticate(request, login=login, password=password)
             if user is not None:
-                login(request, user)
+                auth_login(request, user)
                 refresh = RefreshToken.for_user(user)
                 return Response({
                     'refresh': str(refresh),
@@ -60,7 +60,7 @@ class PostListView(ListView):
         posts = context['posts']
 
         for post in posts:
-            root_comments = post.comments.filter(parent__isnull=True)
+            root_comments = post.comments.filter(parent__isnull=True).order_by('-created_at')
             post.root_comments = root_comments
 
             paginator = Paginator(root_comments, 25)

@@ -99,3 +99,12 @@ body {
 .re-button, .comment-button {
     margin-left: 20px;
 }
+
+.comment-table {
+    margin-top: 20px;
+}
+
+.comment-table th, .comment-table td {
+    padding: 10px;
+    text-align: left;
+}
