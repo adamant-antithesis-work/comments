@@ -3,7 +3,7 @@ from django import forms
 from django.conf import settings
 
 from .captcha_utils import generate_captcha
-from .models import Comment
+from .models import Comment, User
 
 
 class CommentForm(forms.ModelForm):
@@ -88,3 +88,41 @@ class CommentForm(forms.ModelForm):
             os.remove(captcha_image_path)
 
         return cleaned_data
+
+
+class RegisterForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    password2 = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    class Meta:
+        model = User
+        fields = ['login', 'username', 'email', 'password']
+        widgets = {
+            'email': forms.EmailInput(attrs={'placeholder': 'Enter your email'}),
+            'login': forms.TextInput(attrs={'placeholder': 'Enter your login'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Enter your username'}),
+        }
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password')
+        password2 = self.cleaned_data.get('password2')
+        if password1 != password2:
+            self.add_error('password2', "Passwords do not match")
+        return password2
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            self.add_error('password2', "Passwords do not match")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        if commit:
+            user.save()
+        return user

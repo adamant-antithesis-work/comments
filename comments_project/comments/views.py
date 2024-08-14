@@ -4,28 +4,62 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import IntegrityError
-from django.views import View
+from django.http import HttpResponseRedirect
 from django.views.generic import ListView, FormView
-from django.shortcuts import get_object_or_404, redirect
-from .models import Post, Comment, User
-from .forms import CommentForm
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Post, Comment
 from rest_framework.views import APIView
-from .serializers import RegisterSerializer, LoginSerializer
-from rest_framework import status
-from rest_framework.response import Response
+from .serializers import LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.conf import settings
+from django.urls import reverse
+from django.utils.http import urlencode
+from django.http import JsonResponse
+from django.views import View
+from .forms import CommentForm, RegisterForm
 
 
-class RegisterView(APIView):
+def render_error_template(request):
+    error_message = request.POST.get('error_message', 'Unknown error')
+    return JsonResponse({'error_message': error_message})
+
+
+class LogoutView(DjangoLogoutView):
+    next_page = '/'
+
+
+class ErrorPageView(View):
+    def get(self, request):
+        return render(request, 'error.html')
+
+
+class RegisterView(View):
+    def get(self, request):
+        form = RegisterForm()
+        return render(request, 'register.html', {'form': form})
+
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({'message': 'User registered successfully', 'user': RegisterSerializer(user).data},
-                            status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('post-list'))
+        else:
+            error_messages = []
+            for field, errors in form.errors.items():
+                field_errors = []
+                for error in errors:
+                    if isinstance(error, dict):
+                        message = error.get('message', 'Unknown error')
+                    else:
+                        message = str(error)
+                    field_errors.append(message)
+                field_errors_str = '; '.join(field_errors)
+                error_messages.append(f"{field.capitalize()}: {field_errors_str}")
+
+            error_message = ' | '.join(error_messages)
+
+            return redirect(f'{reverse("error_page")}?{urlencode({"error_message": error_message})}')
 
 
 class LoginView(APIView):
@@ -39,14 +73,16 @@ class LoginView(APIView):
             if user is not None:
                 auth_login(request, user)
                 refresh = RefreshToken.for_user(user)
-                return Response({
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                    'redirect_url': '/'
-                })
+                response = redirect('/')
+                response.set_cookie('refresh', str(refresh))
+                response.set_cookie('access', str(refresh.access_token))
+                return response
             else:
-                return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return redirect(f'{reverse("error_page")}?{urlencode({"error_message": "Invalid credentials"})}')
+        else:
+            errors = serializer.errors
+            error_message = "; ".join(f"{field}: {', '.join(msg for msg in error_list)}" for field, error_list in errors.items())
+            return redirect(f'{reverse("error_page")}?{urlencode({"error_message": error_message})}')
 
 
 class PostListView(ListView):
@@ -145,7 +181,6 @@ class LikeDislikeView(View):
         if action == 'like':
             content.likes += 1
         elif action == 'dislike':
-            if content.likes > 0:
-                content.likes -= 1
+            content.likes -= 1
         content.save()
         return redirect(request.META.get('HTTP_REFERER', '/'))
