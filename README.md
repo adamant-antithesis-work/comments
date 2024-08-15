@@ -19,26 +19,26 @@ Features:
 --Like System: Includes a system for liking comments.
 
 Dependencies:
-	asgiref==3.8.1
-	captcha==0.6.0
-	dj-database-url==2.2.0
-	Django==5.0.8
-	django-ranged-response==0.2.0
-	djangorestframework==3.15.2
-	djangorestframework-simplejwt==5.3.1
-	gunicorn==23.0.0
-	msgpack==1.0.8
-	packaging==24.1
-	pillow==10.4.0
-	psycopg2-binary==2.9.9
-	PyJWT==2.9.0
-	python-decouple==3.8
-	python-dotenv==1.0.1
-	redis==5.0.8
-	six==1.16.0
-	sqlparse==0.5.1
-	typing_extensions==4.12.2
-	tzdata==2024.1
+asgiref==3.8.1
+captcha==0.6.0
+dj-database-url==2.2.0
+Django==5.0.8
+django-ranged-response==0.2.0
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+gunicorn==23.0.0
+msgpack==1.0.8
+packaging==24.1
+pillow==10.4.0
+psycopg2-binary==2.9.9
+PyJWT==2.9.0
+python-decouple==3.8
+python-dotenv==1.0.1
+redis==5.0.8
+six==1.16.0
+sqlparse==0.5.1
+typing_extensions==4.12.2
+tzdata==2024.1
 
 ---Installation and Configuration
 
