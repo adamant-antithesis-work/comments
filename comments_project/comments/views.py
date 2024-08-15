@@ -155,6 +155,14 @@ class AddCommentView(LoginRequiredMixin, FormView):
                     f.write(avatar.read())
                 comment.user.avatar = filename
 
+            if 'attachment' in self.request.FILES:
+                attachment = self.request.FILES['attachment']
+                filename = f'comment_{comment.id}_{attachment.name}'
+                filepath = os.path.join(settings.MEDIA_ROOT, 'attachments', filename)
+                with open(filepath, 'wb+') as f:
+                    f.write(attachment.read())
+                comment.attachment = filename
+
             user.save()
         except IntegrityError as e:
             if 'email' in str(e):
@@ -166,7 +174,10 @@ class AddCommentView(LoginRequiredMixin, FormView):
         return redirect('post-list')
 
     def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
+        errors = form.errors
+        error_message = "; ".join(
+            f"{field}: {', '.join(msg for msg in error_list)}" for field, error_list in errors.items())
+        return redirect(f'{reverse("error_page")}?{urlencode({"error_message": error_message})}')
 
 
 class LikeDislikeView(View):

@@ -78,6 +78,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
     likes = models.IntegerField(default=0)
+    attachment = models.FileField(upload_to='attachments/', blank=True, null=True)
 
     def clean(self):
         self.text = strip_tags(self.text)

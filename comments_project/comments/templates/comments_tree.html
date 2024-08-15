@@ -56,9 +56,42 @@
         </div>
         <div class="comment-body">
             {{ comment.text }}
+            {% if comment.attachment %}
+                <p>
+                    <div class="attachment-info d-flex align-items-center">
+                        {% with comment.attachment.name|file_icon_and_name as file_info %}
+                            <span class="file-icon">{{ file_info|safe }}</span>
+                        {% endwith %}
+                        <div class="ms-auto">
+                            <a href="{{ comment.attachment.url }}" class="btn btn-link" download>Download</a>
+                            <a href="#" class="btn btn-link view-attachment"
+                               data-url="{{ comment.attachment.url }}"
+                               data-file-name="{{ comment.attachment.name }}"
+                               data-toggle="modal" data-target="#attachmentModal">View</a>
+                        </div>
+                    </div>
+            {% endif %}
         </div>
         <div class="replies mt-3" style="margin-left: 15px; margin-right: -17px; margin-bottom: -30px;">
             {% include 'comments_tree.html' with comments=comment.replies.all comment_form=comment_form %}
+        </div>
+
+        <div class="modal fade" id="attachmentModal" tabindex="-1" aria-labelledby="attachmentModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="attachmentModalLabel">Attachment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body d-flex justify-content-center align-items-center" id="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="modal fade" id="reply-modal-{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="reply-modal-label-{{ comment.id }}" aria-hidden="true">

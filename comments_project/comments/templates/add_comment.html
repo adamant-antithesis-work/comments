@@ -9,10 +9,15 @@
     </div>
 {% endif %}
 
-<form action="{% url 'add-comment' post.id %}" method="post">
+<form method="post" action="{% url 'add-comment' post.id %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <img src="{% static 'captcha/'|add:form.captcha_image %}" alt="CAPTCHA">
-    <input type="text" name="captcha_text" placeholder="Enter CAPTCHA">
-    <input type="submit" value="Add comment">
+    <input type="text" name="captcha_text" placeholder="Enter CAPTCHA" required>
+
+    <div class="form-group">
+        <label for="attachment">Attach a file (optional):</label>
+        <input type="file" name="attachment" id="attachment" class="form-control">
+    </div>
+    <input type="submit" value="Add comment" class="btn btn-primary">
 </form>
