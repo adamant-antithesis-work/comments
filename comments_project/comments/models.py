@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.core.validators import RegexValidator, EmailValidator, URLValidator
 from django.utils import timezone
@@ -25,7 +26,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, login, username, password, **extra_fields)
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, validators=[EmailValidator()])
     username = models.CharField(
         max_length=150,
