@@ -100,11 +100,11 @@
 
 10. **Uncomment the line:**
    
-	# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+		# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 11. **Comment the line:**
 
-	STATIC_ROOT = os.path.join(BASE_DIR, 'static')	
+		STATIC_ROOT = os.path.join(BASE_DIR, 'static')	
 
 12. **Create and Apply Migrations:**
 
