@@ -2,6 +2,8 @@
 
 ## Comments Project
 
+![Alt text](fsLr4EV07s.gif)
+
 ### Features
 
 - **Uses JWT for Authentication:** Secure user authentication with JSON Web Tokens.
