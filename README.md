@@ -77,13 +77,13 @@
    
    **.env File Content:**
    
-   	SECRET_KEY="Your_Secret_Key"
-   	DATABASE_URL=postgres://postgres:postgres@db:5432/comments_db
-   	DJANGO_DB_NAME=comments_db
-   	DJANGO_DB_USER="Your_DB_Username"
-   	DJANGO_DB_PASSWORD="Your_DB_Password"
-   	DJANGO_DB_HOST=db
-   	DJANGO_DB_PORT=5432
+	   SECRET_KEY="Your_Secret_Key"
+	   DATABASE_URL=postgres://postgres:postgres@db:5432/comments_db
+	   DJANGO_DB_NAME=comments_db
+	   DJANGO_DB_USER="Your_DB_Username"
+	   DJANGO_DB_PASSWORD="Your_DB_Password"
+	   DJANGO_DB_HOST=db
+	   DJANGO_DB_PORT=5432
 
 10. **Update Database Settings in settings.py:**
 
