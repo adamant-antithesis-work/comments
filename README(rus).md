@@ -49,11 +49,11 @@
 	On Windows: env\Scripts\activate
 	On macOS and Linux: source env/bin/activate
 
-6. **Установите зависимости командой(если команда недоступна перейдите в каталог на уровень выше)::**
+5. **Установите зависимости командой(если команда недоступна перейдите в каталог на уровень выше)::**
    ```bash
 	pip install -r requirements.txt
 
-8. **Создайте базу данных с названием "comments_db":**
+6. **Создайте базу данных с названием "comments_db":**
    ```bash
 	Access the PostgreSQL shell with:
 
@@ -63,59 +63,59 @@
 
 	CREATE DATABASE comments_db;
 
-9. **Выходите из PostgreSQL shell(введите команду \q и нажмите Enter):**
+7. **Выходите из PostgreSQL shell(введите команду \q и нажмите Enter):**
    ```bash
 	\q
 
-10. **Создайте файл ".env" на уровне с файлами докер:**
+8. **Создайте файл ".env" на уровне с файлами докер:**
 
    **Что бы сгенерировать секретный ключ можете использовать команду:**
    
-   	python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+       python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
    
    **.env File Content:**
    
-   	SECRET_KEY="Your_Secret_Key"
-   	DATABASE_URL=postgres://postgres:postgres@db:5432/comments_db
-   	DJANGO_DB_NAME=comments_db
-   	DJANGO_DB_USER="Your_DB_Username"
-   	DJANGO_DB_PASSWORD="Your_DB_Password"
-   	DJANGO_DB_HOST=db
-   	DJANGO_DB_PORT=5432
+	   	SECRET_KEY="Your_Secret_Key"
+	   	DATABASE_URL=postgres://postgres:postgres@db:5432/comments_db
+	   	DJANGO_DB_NAME=comments_db
+	   	DJANGO_DB_USER="Your_DB_Username"
+	   	DJANGO_DB_PASSWORD="Your_DB_Password"
+	   	DJANGO_DB_HOST=db
+	   	DJANGO_DB_PORT=5432
 
 9. **Введите данные для подключения к базе данных в файле "settings.py"**
 
-   **Расскоментируйте участок кода и введите данные для подключения к базе данных в файле "settings.py"**
+10. **Расскоментируйте участок кода и введите данные для подключения к базе данных в файле "settings.py"**
 
-	DATABASES = {
-	    'default': {
-	        'ENGINE': 'django.db.backends.postgresql',
-	        'NAME': 'comments_db',
-	        'USER': 'Your_DB_Username',
-	        'PASSWORD': 'Your_DB_Password',
-	        'HOST': 'localhost',
-	        'PORT': '5432',
-	    }
-	}
+		DATABASES = {
+		    'default': {
+		        'ENGINE': 'django.db.backends.postgresql',
+		        'NAME': 'comments_db',
+		        'USER': 'Your_DB_Username',
+		        'PASSWORD': 'Your_DB_Password',
+		        'HOST': 'localhost',
+		        'PORT': '5432',
+		    }
+		}
 
-10. **Расскомментируйте строчку:**
+11. **Расскомментируйте строчку:**
    
 		# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-11. **Закомментируйте строчку:**
+12. **Закомментируйте строчку:**
 
 		STATIC_ROOT = os.path.join(BASE_DIR, 'static')	
 
-12. **Создайте и примените миграции (проверьте что находитесь в каталоге на уровне с файлом manage.py) с помощью этих команд:**
+13. **Создайте и примените миграции (проверьте что находитесь в каталоге на уровне с файлом manage.py) с помощью этих команд:**
 
         python manage.py makemigrations
 	     python manage.py migrate
 
-13. **Добавьте фикстуру с помощь команды:**
+14. **Добавьте фикстуру с помощь команды:**
 
 	      python manage.py loaddata comments/fixtures/initial_data.json
     
-14. **Теперь можете запускать сервер с помощью команды:**
+15. **Теперь можете запускать сервер с помощью команды:**
 
 	      python manage.py runserver
 
@@ -139,8 +139,16 @@
 
 2. **Находясь на уровне с файлом docker-compose введите команду:**
 
-	   docker-compose up --build
+       docker-compose up --build
 
-Если по какой-то причине сервер после этого не стартовал ввести команду:
+       Если по какой-то причине сервер после этого не стартовал ввести команду:
 
-	   docker-compose up
+       docker-compose up
+
+3. **Войдите в контейнер Django:**
+
+        docker exec -it django_backend /bin/bash
+   
+3. **Загрузите исходные данные:**
+
+       python manage.py loaddata comments/fixtures/initial_data.json
