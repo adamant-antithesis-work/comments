@@ -55,7 +55,7 @@
    ```bash
 	pip install -r requirements.txt
 
-8. **Create the Database:**
+7. **Create the Database:**
    ```bash
 	Access the PostgreSQL shell with:
 
@@ -65,11 +65,11 @@
 
 	CREATE DATABASE comments_db;
 
-9. **Exit the PostgreSQL Shell:**
+8. **Exit the PostgreSQL Shell:**
    ```bash
 	\q
 
-10. **Create a .env File:**
+9. **Create a .env File:**
 
    **To generate your SECRET_KEY, use:**
    
@@ -85,7 +85,7 @@
    	DJANGO_DB_HOST=db
    	DJANGO_DB_PORT=5432
 
-9. **Update Database Settings in settings.py:**
+10. **Update Database Settings in settings.py:**
 
    **Uncomment and configure the database settings:**
 
@@ -100,20 +100,20 @@
 	    }
 	}
 
-10. **Uncomment the line:**
+11. **Uncomment the line:**
    
 		# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-11. **Comment the line:**
+12. **Comment the line:**
 
 		STATIC_ROOT = os.path.join(BASE_DIR, 'static')	
 
-12. **Create and Apply Migrations:**
+13. **Create and Apply Migrations:**
 
         python manage.py makemigrations
 	     python manage.py migrate
 
-13. **Load Initial Data:**
+14. **Load Initial Data:**
 
 	      python manage.py loaddata comments/fixtures/initial_data.json
     
@@ -143,6 +143,14 @@
 
 	   docker-compose up --build
 
-If the server does not start, try:
+	   If the server does not start, try:
 
 	   docker-compose up
+
+3. **Enter the Django container:**
+
+           docker exec -it django_backend /bin/bash
+   
+4. **Load Initial Data:**
+
+	      python manage.py loaddata comments/fixtures/initial_data.json
